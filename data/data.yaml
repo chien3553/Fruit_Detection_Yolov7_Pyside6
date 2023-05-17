@@ -1,0 +1,13 @@
+train: ../data/train/images
+val: ../data/valid/images
+test: ../data/test/images
+
+nc: 4
+names: ['Apple', 'Banana', 'Grapes', 'Lemon']
+
+roboflow:
+  workspace: ai-papvn
+  project: fruit-1lp78
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/ai-papvn/fruit-1lp78/dataset/2
