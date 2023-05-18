@@ -9,19 +9,22 @@ import torch.backends.cudnn as cudnn
 from PySide6.QtCore import QThread
 from numpy import random
 from models.experimental import attempt_load
-from utils.datasets import LoadStreams, LoadImages
+from utils.datasets import LoadStreams, LoadImages, LoadWebcam
 from utils.general import check_img_size, check_requirements, check_imshow, non_max_suppression, apply_classifier, \
     scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 from lib import glo
+# import serial
+
+# ser = serial.Serial('COM3', 9600,timeout = 0.05)
 
 
 class YoloThread(QThread):
     send_input = Signal(np.ndarray)
     send_output = Signal(np.ndarray)
     send_result = Signal(dict)
-    # emit：detecting/pause/stop/finished/error msg
+    
     send_msg = Signal(str)
     send_percent = Signal(int)
     send_fps = Signal(str)
@@ -77,7 +80,7 @@ class YoloThread(QThread):
             if webcam:
                 view_img = check_imshow()
                 cudnn.benchmark = True  # set True to speed up constant image size inference
-                dataset = LoadStreams(source, img_size=imgsz, stride=stride)
+                dataset = LoadWebcam(source, img_size=imgsz, stride=stride)
             else: 
                 dataset = LoadImages(source, img_size=imgsz, stride=stride)
             # Get names and colors
@@ -92,23 +95,23 @@ class YoloThread(QThread):
 
             dataset = iter(dataset)
 
-            # 参数设置
             t0 = time.time()
             count = 0
-            # 开始处理每一张图片
+            # Start
             while True:
 
-                # 停止检测
+                # Stop
                 if self.jump_out:
                     self.send_percent.emit(0)
                     if self.vid_cap is not None:
                         self.vid_cap.release()
                     self.send_msg.emit('Stop')
+                    self.send_fps.emit('')
                     if self.vid_writer is not None:
                         self.vid_writer.release()
                     break
 
-                # change model
+                # Change model
                 if self.current_weight != self.weights:
                     # Load model
                     model = attempt_load(self.weights, map_location=device)  # load FP32 model
@@ -128,19 +131,23 @@ class YoloThread(QThread):
 
                 if self.is_continue:
                     path, img, im0s, self.vid_cap = next(dataset)
-                    # 原始图片送入 input框
+                    # Input image/video
                     self.send_input.emit(im0s if isinstance(im0s, np.ndarray) else im0s[0])
-                    # 处理processBar
+                    # ProcessBar and show FPS video/stream
                     count += 1
+
+                    if count % 30 == 0 and count >= 30:
+                        fps = int(30/(time.time()-t0))
+                        self.send_fps.emit('FPS：'+str(fps))
+                        t0 = time.time()
 
                     if self.vid_cap:
                         percent = int(count / self.vid_cap.get(cv2.CAP_PROP_FRAME_COUNT) * self.percent_length)
                         self.send_percent.emit(percent)
                     else:
                         percent = self.percent_length
-                        print(percent)
 
-                    # 处理图片
+                    # Processing
                     statistic_dic = {name: 0 for name in names}
                     img = torch.from_numpy(img).to(device)
                     img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -169,10 +176,7 @@ class YoloThread(QThread):
 
                     # Process detections
                     for i, det in enumerate(pred):  # detections per image
-                        if webcam:  # batch_size >= 1
-                            p, s, im0, frame = path[i], '%g: ' % i, im0s[i].copy(), dataset.count
-                        else:
-                            p, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
+                        p, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
                         p = Path(p)  # to Path
                         self.save_path = str(save_dir / p.name)  # img.jpg
                         gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
@@ -190,6 +194,16 @@ class YoloThread(QThread):
                     self.send_output.emit(im0)
                     self.send_result.emit(statistic_dic)
 
+                    # Arduino
+                    # if int(cls) == 0:
+                    #     ser.write(b'0')
+                    # if int(cls) == 1:
+                    #     ser.write(b'1')
+                    # if int(cls) == 2:
+                    #     ser.write(b'2')
+                    # if int(cls) == 3:
+                    #     ser.write(b'3')
+
                     # Save results (image with detections)
                     if save_img:
                         if dataset.mode == 'image':
@@ -204,17 +218,14 @@ class YoloThread(QThread):
                                     fps = self.vid_cap.get(cv2.CAP_PROP_FPS)
                                     w = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                                     h = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                                else:
+                                    print(self.save_path)
+                                else:  # stream
                                     fps, w, h = 30, im0.shape[1], im0.shape[0]
-                                    self.save_path += '.mp4'
+                                    print(self.save_path)
                                 self.vid_writer = cv2.VideoWriter(self.save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                             self.vid_writer.write(im0)
-                    if webcam:
-                        pass
-
-                    else:            
+                    if self.vid_cap:           
                         if percent == self.percent_length:
-                            # print(count)
                             self.send_percent.emit(0)
                             self.send_msg.emit('Finished')
                             if self.vid_writer is not None:

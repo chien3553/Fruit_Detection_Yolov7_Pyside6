@@ -1536,6 +1536,13 @@ background-color: rgba(223, 223, 223, 150);
         </property>
        </widget>
       </item>
+      <item alignment="Qt::AlignRight">
+       <widget class="QLabel" name="fps_label">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

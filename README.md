@@ -2,6 +2,13 @@
 
 This project is based on [YOLOv7](https://github.com/WongKinYiu/yolov7) & [yolov7-Pyside6](https://github.com/SwimmingLiu/yolov7-Pyside6)
 
+## Preview
+<div align="center">
+    <a href="./">
+        <img src="./img/home.png" width="79%"/>
+    </a>
+</div>
+
 ## Run 
 ```bash
   python main.py
@@ -9,13 +16,14 @@ This project is based on [YOLOv7](https://github.com/WongKinYiu/yolov7) & [yolov
 
 ## Function
 
-1. support image/video/webcam as input
-2. change model
-3. change IoU
-4. change confidence
-5. play/pause/stop
-6. show result 
-8. export detected image/video
+1. Support image/video/webcam as input
+2. Change model
+3. Change IoU
+4. Change confidence
+5. Play/Pause/Stop
+6. Show statistics 
+8. Export detected image/video(webcam)
+9. Show FPS
 
 ## Reference
 - [WongKinYiu/yolov7](https://github.com/WongKinYiu/yolov7)

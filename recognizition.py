@@ -22,10 +22,10 @@ formType, baseType = loadUiType("./ui/main.ui")
 class YOLO(formType, baseType):
     def __init__(self):
         super().__init__()
-        # 加载UI
+        # Load UI
         self.setupUi(self)
         self.setWindowFlags(Qt.CustomizeWindowHint)
-        # ui部件功能设置
+        # Function
         self.inputPath = ""
         # Slider
         self.con_slider.valueChanged.connect(self.ValueChange)
@@ -39,8 +39,7 @@ class YOLO(formType, baseType):
         self.exporter.clicked.connect(self.Export)
         self.webcam.clicked.connect(self.Webcam)
 
-        # 最大化 最小化 关闭
-        # 最大化按钮图片变化
+        # Maximize, Minimize, Close button
         MaxIcon = QtGui.QIcon()
         MaxIcon.addPixmap(QtGui.QPixmap("./img/icons/square.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MaxIcon.addPixmap(QtGui.QPixmap("./img/icons/reduce.png"), QtGui.QIcon.Active, QtGui.QIcon.On)
@@ -50,12 +49,11 @@ class YOLO(formType, baseType):
         self.MaxButton.clicked.connect(self.max_or_restore)
         self.MinButton.clicked.connect(self.showMinimized)
         self.CloseButton.clicked.connect(self.close)
-        # 视频预览
+        # Preview
         self.input.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
         self.output.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
-        # 视频操作
-        # 播放按钮图片变化
+        # Play/Pause button
         PlayIcon = QtGui.QIcon()
         PlayIcon.addPixmap(QtGui.QPixmap("./img/icons/play-button.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         PlayIcon.addPixmap(QtGui.QPixmap("./img/icons/pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
@@ -68,7 +66,7 @@ class YOLO(formType, baseType):
         self.playbtn.setCheckable(True)
         self.playbtn.setIcon(PlayIcon)
 
-        # 自动加载 pt文件
+        # Load .pt default
         self.comboBox.clear()
         self.pt_Path = "./ptmodel"
         self.pt_list = os.listdir('./ptmodel')
@@ -83,22 +81,23 @@ class YOLO(formType, baseType):
 
         # yolov7 thread
         self.yolo_thread = YoloThread()
-        # 获取模型
+        # Load .pt
         self.model_type = self.comboBox.currentText()
         self.yolo_thread.weights = "./ptmodel/%s" % self.model_type
+
         self.yolo_thread.percent_length = self.progressBar.maximum()
         self.yolo_thread.send_input.connect(lambda x: self.showimg(x, self.input, 'img'))
         self.yolo_thread.send_output.connect(lambda x: self.showimg(x, self.output, 'img'))
         self.yolo_thread.send_result.connect(self.show_result)
         self.yolo_thread.send_msg.connect(lambda x: self.foot_print(x))
         self.yolo_thread.send_percent.connect(lambda x: self.progressBar.setValue(x))
-        # self.yolo_thread.send_fps.connect(lambda x: self.fps_label.setText(x))
+        self.yolo_thread.send_fps.connect(lambda x: self.fps_label.setText(x))
 
-        # 运行或停止 检测
+        # Play/Stop
         self.playbtn.clicked.connect(self.run_or_continue)
         self.stopbtn.clicked.connect(self.stop)
 
-    # 寻找pt模型
+    # Search .pt
     def search_pt(self):
         pt_list = os.listdir('./ptmodel')
         pt_list = [file for file in pt_list if file.endswith('.pt')]
@@ -109,7 +108,7 @@ class YOLO(formType, baseType):
             self.comboBox.clear()
             self.comboBox.addItems(self.pt_list)
 
-    # Conf 和 IoU 变化
+    # Conf and IoU changes
     def ValueChange(self):
         self.numcon = self.con_slider.value() / 100.0
         self.numiou = self.iou_slider.value() / 100.0
@@ -118,12 +117,12 @@ class YOLO(formType, baseType):
         self.iou_num.setValue(self.numiou)
         self.yolo_thread.iou = self.numiou
 
-    # Model 变化
+    # Model changes
     def change_model(self, x):
         self.model_type = self.comboBox.currentText()
         self.yolo_thread.weights = "./ptmodel/%s" % self.model_type
 
-    # 显示Label图片
+    # Show
     @staticmethod
     def showimg(img, label, flag):
         try:
@@ -154,13 +153,13 @@ class YOLO(formType, baseType):
         except Exception as e:
             print(repr(e))
 
-    # 选择照片/视频 并展示
+    # Select image/video
     def Selectfile(self):
         file, _ = QFileDialog.getOpenFileName(
-            self,  # 父窗口对象
-            "Select File",  # 标题
-            "./",  # 默认打开路径为当前路径
-            "(*.jpg *.jpeg *.png *.bmp *.dib  *.jpe  *.jp2 *.mp4)"  # 选择类型过滤项，过滤内容在括号中
+            self,  
+            "Select File",  
+            "./",  
+            "(*.jpg *.jpeg *.png *.bmp *.dib  *.jpe  *.jp2 *.mp4)"  
         )
         if file == "":
             pass
@@ -168,7 +167,7 @@ class YOLO(formType, baseType):
             self.inputPath = file
             glo.set_value('inputPath', self.inputPath)
             if ".avi" in self.inputPath or ".mp4" in self.inputPath:
-                # 显示第一帧
+                # Show first frame
                 self.cap = cv2.VideoCapture(self.inputPath)
                 ret, frame = self.cap.read()
                 if ret:
@@ -181,24 +180,24 @@ class YOLO(formType, baseType):
     # 导入模块
     def Import(self):
         file, _ = QFileDialog.getOpenFileName(
-            self,  # 父窗口对象
-            "Select Model",  # 标题
-            "./",  # 默认打开路径为当前路径
-            "(*.pt)"  # 选择类型过滤项，过滤内容在括号中
+            self,  
+            "Select Model",  
+            "./",  
+            "(*.pt)"  
         )
         if file == "":
             pass
         else:
             shutil.copy(file, self.pt_Path)
-            QMessageBox.information(self, '', 'Import model succeeded!')
+            QMessageBox.information(self, 'Tips', 'Import model succeeded!')
 
-    # 导出结果
+    # Export image/video(webcam)
     def Export(self):
         self.OutputDir, _ = QFileDialog.getSaveFileName(
-            self,  # 父窗口对象
-            "Export",  # 标题
-            r".",  # 起始目录
-            "(*.jpg *.jpeg *.png *.bmp *.dib  *.jpe  *.jp2 *.mp4)"  # 选择类型过滤项，过滤内容在括号中
+            self,  
+            "Export",  
+            r".",  
+            "(*.jpg *.jpeg *.png *.bmp *.dib  *.jpe  *.jp2 *.mp4)"  
         )
         if self.output == "":
             QMessageBox.warning(self, 'Tips', 'Please select the location to save the image/video first')
@@ -210,7 +209,7 @@ class YOLO(formType, baseType):
                 QMessageBox.warning(self, 'Tips', 'Please detect first')
                 print(e)
 
-    # 最大化最小化窗口
+    # maximize minimize window
     def max_or_restore(self):
         global GLOBAL_STATE
         status = GLOBAL_STATE
@@ -221,7 +220,7 @@ class YOLO(formType, baseType):
             self.showNormal()
             GLOBAL_STATE = True
 
-    # 开始/暂停 预测
+    # Play/Pause
     def run_or_continue(self):
         if self.inputPath == "":
             QMessageBox.warning(self, "Tips", "No image or video")
@@ -237,6 +236,7 @@ class YOLO(formType, baseType):
                 self.yolo_thread.is_continue = False
                 self.foot_print('Pause')
 
+    # Webcam
     def Webcam(self):
         self.inputPath = '1'
         glo.set_value('inputPath', self.inputPath)
@@ -245,13 +245,14 @@ class YOLO(formType, baseType):
         if not self.yolo_thread.isRunning():
             self.yolo_thread.start()
             self.foot_print("Detecting")
+            self.playbtn.setChecked(True)
         
-    # 停止识别
+    # Stop
     def stop(self):
         self.yolo_thread.jump_out = True
         self.foot_print('Stop')
 
-    # 统计结果
+    # Show statistics
     def show_result(self, statistic_dic):
         try:
             self.resultlist.clear()
@@ -263,7 +264,7 @@ class YOLO(formType, baseType):
         except Exception as e:
             print(repr(e))
 
-    # foot栏 输出结果
+    # foot print
     def foot_print(self, msg):
         if msg in ['Stop','Finished']:
             self.playbtn.setChecked(False)
@@ -291,7 +292,6 @@ class MyWindow(YOLO):
             self.drag = False
 
     def center(self):
-        # PyQt6获取屏幕参数
         screen = QGuiApplication.primaryScreen().size()
         size = self.geometry()
         self.move((screen.width() - size.width()) / 2,

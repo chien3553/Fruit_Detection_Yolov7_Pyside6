@@ -207,6 +207,7 @@ class LoadImages:  # for inference
 
 class LoadWebcam:  # for inference
     def __init__(self, pipe='0', img_size=640, stride=32):
+        self.mode = 'stream'  # add mode
         self.img_size = img_size
         self.stride = stride
 
@@ -247,8 +248,8 @@ class LoadWebcam:  # for inference
 
         # Print
         assert ret_val, f'Camera Error {self.pipe}'
-        img_path = 'webcam.jpg'
-        print(f'webcam {self.count}: ', end='')
+        img_path = 'webcam.mp4'
+        print(f'webcam {self.pipe}: ', end='')
 
         # Padded resize
         img = letterbox(img0, self.img_size, stride=self.stride)[0]
