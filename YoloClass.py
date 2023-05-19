@@ -224,7 +224,9 @@ class YoloThread(QThread):
                                     print(self.save_path)
                                 self.vid_writer = cv2.VideoWriter(self.save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                             self.vid_writer.write(im0)
-                    if self.vid_cap:           
+                    if webcam:
+                        break
+                    else:          
                         if percent == self.percent_length:
                             self.send_percent.emit(0)
                             self.send_msg.emit('Finished')
