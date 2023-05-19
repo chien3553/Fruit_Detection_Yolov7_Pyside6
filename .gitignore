@@ -5,3 +5,5 @@ __pycache__/
 
 runs/*
 result/*
+
+traced_model.pt
