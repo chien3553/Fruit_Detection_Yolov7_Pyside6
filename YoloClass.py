@@ -218,14 +218,12 @@ class YoloThread(QThread):
                                     fps = self.vid_cap.get(cv2.CAP_PROP_FPS)
                                     w = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                                     h = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                                    print(self.save_path)
                                 else:  # stream
                                     fps, w, h = 30, im0.shape[1], im0.shape[0]
-                                    print(self.save_path)
                                 self.vid_writer = cv2.VideoWriter(self.save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                             self.vid_writer.write(im0)
                     if webcam:
-                        break
+                        pass
                     else:          
                         if percent == self.percent_length:
                             self.send_percent.emit(0)
