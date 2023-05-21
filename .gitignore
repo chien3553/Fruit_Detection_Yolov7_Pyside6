@@ -7,3 +7,5 @@ runs/*
 result/*
 
 traced_model.pt
+
+.idea

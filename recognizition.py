@@ -266,7 +266,7 @@ class YOLO(formType, baseType):
 
     # foot print
     def foot_print(self, msg):
-        if msg in ['Stop','Finished']:
+        if msg in ['Stop','Finished'] or msg.startswith("Error!"):
             self.playbtn.setChecked(False)
         self.outputbox.setText(msg)
 
