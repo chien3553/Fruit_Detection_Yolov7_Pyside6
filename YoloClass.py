@@ -15,9 +15,9 @@ from utils.general import check_img_size, check_requirements, check_imshow, non_
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 from lib import glo
-# import serial
+import serial
 
-# ser = serial.Serial('COM3', 9600,timeout = 0.05)
+ser = serial.Serial('COM5', 9600,timeout = 0.05)
 
 
 class YoloThread(QThread):
@@ -190,19 +190,19 @@ class YoloThread(QThread):
                                 statistic_dic[names[c]] += 1
                                 label = f'{names[int(cls)]} {conf:.2f}'
                                 plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+
+                            # Arduino
+                            if int(cls) == 0:
+                                ser.write(b'0')
+                            if int(cls) == 1:
+                                ser.write(b'1')
+                            if int(cls) == 2:
+                                ser.write(b'2')
+                            if int(cls) == 3:
+                                ser.write(b'3')
                     # Stream results
                     self.send_output.emit(im0)
                     self.send_result.emit(statistic_dic)
-
-                    # Arduino
-                    # if int(cls) == 0:
-                    #     ser.write(b'0')
-                    # if int(cls) == 1:
-                    #     ser.write(b'1')
-                    # if int(cls) == 2:
-                    #     ser.write(b'2')
-                    # if int(cls) == 3:
-                    #     ser.write(b'3')
 
                     # Save results (image with detections)
                     if save_img:
