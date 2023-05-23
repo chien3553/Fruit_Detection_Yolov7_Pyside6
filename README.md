@@ -24,7 +24,7 @@ This project is based on [YOLOv7](https://github.com/WongKinYiu/yolov7) & [yolov
 6. Show statistics 
 8. Export detected image/video(webcam)
 9. Show FPS
-10. Show results in arduino
+10. Show results in LCD(i2c) via arduino
 
 ## Reference
 - [WongKinYiu/yolov7](https://github.com/WongKinYiu/yolov7)
