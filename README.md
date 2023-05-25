@@ -35,9 +35,9 @@ Detect image:
 4. Change confidence
 5. Run/Pause/Stop
 6. Show statistics 
-7. Export detected image/video(webcam)
-8. Show FPS
-9. Show results in LCD(i2c) via arduino
+8. Export detected image/video(webcam)
+9. Show FPS
+10. Show results in arduino
 
 ## Reference
 - [WongKinYiu/yolov7](https://github.com/WongKinYiu/yolov7)
