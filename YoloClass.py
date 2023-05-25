@@ -16,8 +16,18 @@ from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 from lib import glo
 import serial
+import serial.tools.list_ports
 
-ser = serial.Serial('COM5', 9600,timeout = 0.05)
+# Find arduino port
+arduino_ports = [
+    p.device
+    for p in serial.tools.list_ports.comports()
+    if "USB-SERIAL CH340" in p.description
+]
+if arduino_ports:
+    # Mở kết nối tới cổng COM đầu tiên
+    ser = serial.Serial(arduino_ports[0], 9600, timeout = 0.05)
+    print(f"Connected {arduino_ports[0]}")
 
 
 class YoloThread(QThread):
@@ -190,16 +200,17 @@ class YoloThread(QThread):
                                 statistic_dic[names[c]] += 1
                                 label = f'{names[int(cls)]} {conf:.2f}'
                                 plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
-
+                                
+                            send = [int(0)]*1    
+                            encode = 0
                             # Arduino
-                            if int(cls) == 0:
-                                ser.write(b'0')
-                            if int(cls) == 1:
-                                ser.write(b'1')
-                            if int(cls) == 2:
-                                ser.write(b'2')
-                            if int(cls) == 3:
-                                ser.write(b'3')
+                            if arduino_ports:
+                                for i in range(0,4):
+                                    if statistic_dic[names[i]] > 0:
+                                        encode |= 1<<i
+                                send[0] = encode
+                                ser.write(bytes(send))
+                      
                     # Stream results
                     self.send_output.emit(im0)
                     self.send_result.emit(statistic_dic)

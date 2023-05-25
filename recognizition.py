@@ -25,13 +25,13 @@ class YOLO(formType, baseType):
         # Load UI
         self.setupUi(self)
         self.setWindowFlags(Qt.CustomizeWindowHint)
-        # Function
+        
         self.inputPath = ""
         # Slider
-        self.con_slider.valueChanged.connect(self.ValueChange)
-        self.iou_slider.valueChanged.connect(self.ValueChange)
-        self.numcon = self.con_slider.value() / 100.0
-        self.numiou = self.iou_slider.value() / 100.0
+        self.con_slider.valueChanged.connect(self.ValueChangeSlider)
+        self.con_num.valueChanged.connect(self.ValueChangeSpin)
+        self.iou_slider.valueChanged.connect(self.ValueChangeSlider)
+        self.iou_num.valueChanged.connect(self.ValueChangeSpin)
 
         # TOOLS
         self.folder.clicked.connect(self.Selectfile)
@@ -109,12 +109,20 @@ class YOLO(formType, baseType):
             self.comboBox.addItems(self.pt_list)
 
     # Conf and IoU changes
-    def ValueChange(self):
+    def ValueChangeSlider(self):
         self.numcon = self.con_slider.value() / 100.0
         self.numiou = self.iou_slider.value() / 100.0
         self.con_num.setValue(self.numcon)
         self.yolo_thread.conf = self.numcon
         self.iou_num.setValue(self.numiou)
+        self.yolo_thread.iou = self.numiou
+
+    def ValueChangeSpin(self):
+        self.numcon = self.con_num.value() 
+        self.numiou = self.iou_num.value() 
+        self.con_slider.setValue(self.numcon * 100)
+        self.yolo_thread.conf = self.numcon
+        self.iou_slider.setValue(self.numiou * 100)
         self.yolo_thread.iou = self.numiou
 
     # Model changes

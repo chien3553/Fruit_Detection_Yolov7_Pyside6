@@ -5,7 +5,20 @@ This project is based on [YOLOv7](https://github.com/WongKinYiu/yolov7) & [yolov
 ## Preview
 <div align="center">
     <a href="./">
-        <img src="./img/home.png" width="79%"/>
+        <img src="./img/home.png" width="45%"/>
+    </a>
+    <a href="./">
+        <img src="./img/home.jpg" width="45%"/>
+    </a>
+</div>
+
+Detect image:
+<div align="center">
+    <a href="./">
+        <img src="./img/example.png" width="45%"/>
+    </a>
+    <a href="./">
+        <img src="./img/example.jpg" width="45%"/>
     </a>
 </div>
 
@@ -14,17 +27,17 @@ This project is based on [YOLOv7](https://github.com/WongKinYiu/yolov7) & [yolov
   python main.py
 ```
 
-## Function
+## Feature
 
 1. Support image/video/webcam as input
-2. Change model
+2. Import/Change model
 3. Change IoU
 4. Change confidence
-5. Play/Pause/Stop
+5. Run/Pause/Stop
 6. Show statistics 
-8. Export detected image/video(webcam)
-9. Show FPS
-10. Show results in arduino
+7. Export detected image/video(webcam)
+8. Show FPS
+9. Show results in LCD(i2c) via arduino
 
 ## Reference
 - [WongKinYiu/yolov7](https://github.com/WongKinYiu/yolov7)
