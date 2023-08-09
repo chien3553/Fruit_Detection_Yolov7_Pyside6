@@ -22,7 +22,7 @@ import serial.tools.list_ports
 arduino_ports = [
     p.device
     for p in serial.tools.list_ports.comports()
-    if "USB-SERIAL CH340" in p.description
+    if "USB-SERIAL CH340" in p.description # Arduino nano
 ]
 if arduino_ports:
     # Mở kết nối tới cổng COM đầu tiên
@@ -201,9 +201,9 @@ class YoloThread(QThread):
                                 label = f'{names[int(cls)]} {conf:.2f}'
                                 plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
                                 
-                            send = [int(0)]*1    
-                            encode = 0
                             # Arduino
+                            send = [0]   
+                            encode = 0
                             if arduino_ports:
                                 for i in range(0,4):
                                     if statistic_dic[names[i]] > 0:

@@ -185,7 +185,7 @@ class YOLO(formType, baseType):
                 self.showimg(self.inputPath, self.input, 'path')
             self.foot_print("Ready")
 
-    # 导入模块
+    # Import model
     def Import(self):
         file, _ = QFileDialog.getOpenFileName(
             self,  
@@ -246,7 +246,7 @@ class YOLO(formType, baseType):
 
     # Webcam
     def Webcam(self):
-        self.inputPath = '1'
+        self.inputPath = '0'
         glo.set_value('inputPath', self.inputPath)
         self.yolo_thread.jump_out = False
         self.yolo_thread.is_continue = True
