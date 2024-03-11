@@ -1,8 +1,10 @@
+import glob
 import os
 import shutil
 import sys
 import cv2
 import numpy as np
+import keyboard
 from PySide6.QtGui import QPixmap, QImage, QMouseEvent, QGuiApplication
 from PySide6.QtWidgets import QMessageBox, QFileDialog, QMainWindow, QWidget, QApplication
 from PySide6.QtUiTools import QUiLoader, loadUiType
@@ -12,7 +14,6 @@ from PySide6 import QtCore, QtGui
 from PIL import Image
 from lib import glo
 from YoloClass import YoloThread
-
 
 GLOBAL_STATE = True
 
@@ -25,8 +26,12 @@ class YOLO(formType, baseType):
         # Load UI
         self.setupUi(self)
         self.setWindowFlags(Qt.CustomizeWindowHint)
-        
+
         self.inputPath = ""
+        self.path_files = []
+        self.i = 0
+        keyboard.on_press(self.handle_key_press)
+
         # Slider
         self.con_slider.valueChanged.connect(self.ValueChangeSlider)
         self.con_num.valueChanged.connect(self.ValueChangeSpin)
@@ -34,7 +39,8 @@ class YOLO(formType, baseType):
         self.iou_num.valueChanged.connect(self.ValueChangeSpin)
 
         # TOOLS
-        self.folder.clicked.connect(self.Selectfile)
+        self.file.clicked.connect(self.Selectfile)
+        self.folder.clicked.connect(self.SelectFolder)
         self.importbtn.clicked.connect(self.Import)
         self.exporter.clicked.connect(self.Export)
         self.webcam.clicked.connect(self.Webcam)
@@ -97,6 +103,8 @@ class YOLO(formType, baseType):
         self.playbtn.clicked.connect(self.run_or_continue)
         self.stopbtn.clicked.connect(self.stop)
 
+
+
     # Search .pt
     def search_pt(self):
         pt_list = os.listdir('./ptmodel')
@@ -118,8 +126,8 @@ class YOLO(formType, baseType):
         self.yolo_thread.iou = self.numiou
 
     def ValueChangeSpin(self):
-        self.numcon = self.con_num.value() 
-        self.numiou = self.iou_num.value() 
+        self.numcon = self.con_num.value()
+        self.numiou = self.iou_num.value()
         self.con_slider.setValue(self.numcon * 100)
         self.yolo_thread.conf = self.numcon
         self.iou_slider.setValue(self.numiou * 100)
@@ -164,15 +172,16 @@ class YOLO(formType, baseType):
     # Select image/video
     def Selectfile(self):
         file, _ = QFileDialog.getOpenFileName(
-            self,  
-            "Select File",  
-            "./",  
-            "(*.jpg *.jpeg *.png *.bmp *.dib  *.jpe  *.jp2 *.mp4)"  
+            self,
+            "Select File",
+            "./",
+            "(*.jpg *.jpeg *.png *.bmp *.dib  *.jpe  *.jp2 *.mp4)"
         )
         if file == "":
             pass
         else:
             self.inputPath = file
+            print(self.inputPath)
             glo.set_value('inputPath', self.inputPath)
             if ".avi" in self.inputPath or ".mp4" in self.inputPath:
                 # Show first frame
@@ -185,13 +194,40 @@ class YOLO(formType, baseType):
                 self.showimg(self.inputPath, self.input, 'path')
             self.foot_print("Ready")
 
+    def SelectFolder(self):
+        options = QFileDialog.Options()
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder", options=options)
+        if folder_path == '':
+            pass
+        else:
+            self.i = 0
+            self.path_files = glob.glob(folder_path + '\\*')
+            self.inputPath = self.path_files[self.i].replace('\\', '/')
+            glo.set_value('inputPath', self.inputPath)
+            # print(self.inputPath)
+            self.showimg(self.inputPath, self.input, 'path')
+        self.foot_print("Ready")
+
+    def handle_key_press(self, event):
+        if self.i < len(self.path_files) - 1:  # Đảm bảo không vượt quá chỉ số cuối cùng của mảng
+            if event.name == 'd':  # Kiểm tra xem phím được nhấn có phải là phím D hay không
+                self.i += 1
+            elif event.name == 'a':
+                self.i -= 1
+            self.inputPath = self.path_files[self.i]
+            glo.set_value('inputPath', self.inputPath)
+            # print(self.i)
+            self.showimg(self.inputPath, self.input, 'path')
+        self.foot_print("Ready")
+
+
     # Import model
     def Import(self):
         file, _ = QFileDialog.getOpenFileName(
-            self,  
-            "Select Model",  
-            "./",  
-            "(*.pt)"  
+            self,
+            "Select Model",
+            "./",
+            "(*.pt)"
         )
         if file == "":
             pass
@@ -202,10 +238,10 @@ class YOLO(formType, baseType):
     # Export image/video(webcam)
     def Export(self):
         self.OutputDir, _ = QFileDialog.getSaveFileName(
-            self,  
-            "Export",  
-            r".",  
-            "(*.jpg *.jpeg *.png *.bmp *.dib  *.jpe  *.jp2 *.mp4)"  
+            self,
+            "Export",
+            r".",
+            "(*.jpg *.jpeg *.png *.bmp *.dib  *.jpe  *.jp2 *.mp4)"
         )
         if self.output == "":
             QMessageBox.warning(self, 'Tips', 'Please select the location to save the image/video first')
@@ -237,9 +273,10 @@ class YOLO(formType, baseType):
             self.yolo_thread.jump_out = False
             if self.playbtn.isChecked():
                 self.yolo_thread.is_continue = True
+                # print(self.yolo_thread.isRunning())
                 if not self.yolo_thread.isRunning():
                     self.yolo_thread.start()
-                    self.foot_print("Detecting>>>>>" + self.inputPath )
+                    self.foot_print("Detecting>>>>>" + self.inputPath)
             else:
                 self.yolo_thread.is_continue = False
                 self.foot_print('Pause')
@@ -254,11 +291,12 @@ class YOLO(formType, baseType):
             self.yolo_thread.start()
             self.foot_print("Detecting")
             self.playbtn.setChecked(True)
-        
+
     # Stop
     def stop(self):
         self.yolo_thread.jump_out = True
         self.foot_print('Stop')
+        # print(self.yolo_thread.isRunning())
 
     # Show statistics
     def show_result(self, statistic_dic):
@@ -274,7 +312,7 @@ class YOLO(formType, baseType):
 
     # foot print
     def foot_print(self, msg):
-        if msg in ['Stop','Finished'] or msg.startswith("Error!"):
+        if msg in ['Stop', 'Finished'] or msg.startswith("Error!"):
             self.playbtn.setChecked(False)
         self.outputbox.setText(msg)
 
