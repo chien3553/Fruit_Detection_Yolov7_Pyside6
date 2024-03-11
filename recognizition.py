@@ -181,7 +181,7 @@ class YOLO(formType, baseType):
             pass
         else:
             self.inputPath = file
-            print(self.inputPath)
+            # print(self.inputPath)
             glo.set_value('inputPath', self.inputPath)
             if ".avi" in self.inputPath or ".mp4" in self.inputPath:
                 # Show first frame

@@ -216,23 +216,23 @@ class YoloThread(QThread):
                     self.send_result.emit(statistic_dic)
 
                     # Save results (image with detections)
-                    if save_img:
-                        if dataset.mode == 'image':
-                            cv2.imwrite(self.save_path, im0)
-                            print(f" The image with the result is saved in: {self.save_path}")
-                        else:  # 'video' or 'stream'
-                            if vid_path != self.save_path:  # new video
-                                vid_path = self.save_path
-                                if isinstance(self.vid_writer, cv2.VideoWriter):
-                                    self.vid_writer.release()  # release previous video writer
-                                if self.vid_cap:  # video
-                                    fps = self.vid_cap.get(cv2.CAP_PROP_FPS)
-                                    w = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                                    h = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                                else:  # stream
-                                    fps, w, h = 30, im0.shape[1], im0.shape[0]
-                                self.vid_writer = cv2.VideoWriter(self.save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
-                            self.vid_writer.write(im0)
+                    # if save_img:
+                    #     if dataset.mode == 'image':
+                    #         cv2.imwrite(self.save_path, im0)
+                    #         print(f" The image with the result is saved in: {self.save_path}")
+                    #     else:  # 'video' or 'stream'
+                    #         if vid_path != self.save_path:  # new video
+                    #             vid_path = self.save_path
+                    #             if isinstance(self.vid_writer, cv2.VideoWriter):
+                    #                 self.vid_writer.release()  # release previous video writer
+                    #             if self.vid_cap:  # video
+                    #                 fps = self.vid_cap.get(cv2.CAP_PROP_FPS)
+                    #                 w = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    #                 h = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    #             else:  # stream
+                    #                 fps, w, h = 30, im0.shape[1], im0.shape[0]
+                    #             self.vid_writer = cv2.VideoWriter(self.save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+                    #         self.vid_writer.write(im0)
                     if webcam:
                         pass
                     else:          
