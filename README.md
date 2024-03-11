@@ -30,14 +30,15 @@ Detect image:
 ## Feature
 
 1. Support image/video/webcam as input
-2. Import/Change model
-3. Change IoU
-4. Change confidence
-5. Run/Pause/Stop
-6. Show statistics 
-7. Export detected image/video(webcam)
-8. Show FPS
-9. Show results in LCD(i2c) via arduino
+2. Import folder images (new) ('d' to next, 'a' to back)
+3. Import/Change model
+4. Change IoU
+5. Change confidence
+6. Run/Pause/Stop
+7. Show statistics 
+8. Export detected image/video(webcam)
+9. Show FPS
+10. Show results in LCD(i2c) via arduino
 
 ## Reference
 - [WongKinYiu/yolov7](https://github.com/WongKinYiu/yolov7)
